@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solari Analytics — Support Agent Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-slate-50/60 text-slate-900 min-h-screen antialiased flex flex-col">
+    
+    <!-- Top Bar Navigation -->
+    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-20 px-6 py-3.5 flex justify-between items-center shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 text-white text-[11px] font-black tracking-widest uppercase px-2.5 py-1 rounded-md shadow-xs">
+                Solari OS
+            </div>
+            <div class="h-4 w-px bg-slate-200"></div>
+            <h1 class="text-sm font-semibold text-slate-800">Support Ticket Resolution Assistant</h1>
+        </div>
+        
+        <div class="flex items-center gap-4 text-xs">
+            <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-medium">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Engine Active
+            </span>
+            <span class="text-slate-400 font-mono hidden sm:inline-block">Target SLA: &lt;50ms</span>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+        
+        <!-- Left Column: Input Panel -->
+        <section class="lg:col-span-5 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+                <!-- Panel Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <span>📥</span> Incoming Ticket Context
+                    </h2>
+                    <button type="button" onclick="clearForm()" class="text-xs text-slate-400 hover:text-slate-700 transition font-medium">
+                        Reset Form
+                    </button>
+                </div>
+
+                <!-- Quick Test Demo Pills -->
+                <div class="mb-5 pb-4 border-b border-slate-100">
+                    <span class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Quick Evaluation Presets:</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="loadPreset('NT-1')" class="px-2.5 py-1 text-xs font-medium bg-slate-100 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-slate-600 border border-slate-200/80 rounded-lg transition">
+                            NT-1 (Password)
+                        </button>
+                        <button type="button" onclick="loadPreset('NT-2')" class="px-2.5 py-1 text-xs font-medium bg-slate-100 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-slate-600 border border-slate-200/80 rounded-lg transition">
+                            NT-2 (Billing)
+                        </button>
+                        <button type="button" onclick="loadPreset('NT-3')" class="px-2.5 py-1 text-xs font-medium bg-slate-100 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-slate-600 border border-slate-200/80 rounded-lg transition">
+                            NT-3 (Okta SSO)
+                        </button>
+                        <button type="button" onclick="loadPreset('NT-4')" class="px-2.5 py-1 text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/80 rounded-lg transition">
+                            NT-4 (Novel Issue)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Form -->
+                <form id="ticketForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Ticket Subject</label>
+                        <input 
+                            type="text" 
+                            id="subject" 
+                            required 
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition" 
+                            placeholder="e.g. Cannot complete Okta SAML login redirect"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Ticket Description / Customer Query</label>
+                        <textarea 
+                            id="description" 
+                            rows="6" 
+                            required 
+                            class="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-3 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition resize-none" 
+                            placeholder="Paste full ticket body, customer query details, or technical error log..."
+                        ></textarea>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 font-semibold text-white rounded-xl py-3 text-sm transition-all flex justify-center items-center gap-2 shadow-sm hover:shadow"
+                    >
+                        <span>🔍</span> Search Historical Resolutions
+                    </button>
+                </form>
+            </div>
+
+            <!-- Footer Operational Note -->
+            <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 leading-relaxed">
+                <span class="font-semibold text-slate-600">Deterministic Engine:</span> Processes queries using TF-IDF term weighting and Cosine Similarity scoring ($0.30$ confidence gate).
+            </div>
+        </section>
+
+        <!-- Right Column: Recommendation Results -->
+        <section class="lg:col-span-7 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <span>💡</span> Historical Recommendations 
+                    <span id="matchBadge" class="bg-slate-100 text-slate-700 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-200/80">0</span>
+                </h2>
+                <span id="latencyTag" class="hidden text-xs font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                    Latency: 0 ms
+                </span>
+            </div>
+
+            <!-- Dynamic Container -->
+            <div id="resultsContainer" class="flex-1 flex flex-col justify-center">
+                <div class="py-16 text-center border-2 border-dashed border-slate-200/80 rounded-xl bg-slate-50/50">
+                    <div class="text-3xl mb-2">🎫</div>
+                    <p class="text-sm font-semibold text-slate-700">No active ticket query</p>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Fill in the ticket details on the left or select a quick preset to run search.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = '/api/match';
+
+        const PRESETS = {
+            "NT-1": {
+                subject: "Can't log in after resetting password",
+                description: "Customer reset password via email link but new credentials are rejected."
+            },
+            "NT-2": {
+                subject: "Charged twice for monthly subscription",
+                description: "Customer sees duplicate billing charge on credit card statement for October cycle."
+            },
+            "NT-3": {
+                subject: "SAML Okta authentication failure 500",
+                description: "User getting HTTP 500 status when redirecting back from Okta SSO tenant."
+            },
+            "NT-4": {
+                subject: "Snowflake data warehouse sync error 504",
+                description: "Custom ETL pipeline connector timeout while syncing raw events table."
+            }
+        };
+
+        function loadPreset(key) {
+            if (PRESETS[key]) {
+                document.getElementById('subject').value = PRESETS[key].subject;
+                document.getElementById('description').value = PRESETS[key].description;
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('subject').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('matchBadge').innerText = '0';
+            document.getElementById('latencyTag').classList.add('hidden');
+            document.getElementById('resultsContainer').className = 'flex-1 flex flex-col justify-center';
+            document.getElementById('resultsContainer').innerHTML = `
+                <div class="py-16 text-center border-2 border-dashed border-slate-200/80 rounded-xl bg-slate-50/50">
+                    <div class="text-3xl mb-2">🎫</div>
+                    <p class="text-sm font-semibold text-slate-700">No active ticket query</p>
+                    <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto">Fill in the ticket details on the left or select a quick preset to run search.</p>
+                </div>
+            `;
+        }
+
+        document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const subject = document.getElementById('subject').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const resultsContainer = document.getElementById('resultsContainer');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!subject || !description) return;
+
+            // Loading UI
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70');
+            resultsContainer.className = 'flex-1 flex flex-col justify-center';
+            resultsContainer.innerHTML = `
+                <div class="py-16 text-center text-slate-500 animate-pulse flex flex-col items-center gap-3">
+                    <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span class="text-xs font-mono">Vectorizing query & running cosine math...</span>
+                </div>
+            `;
+
+            const t0 = performance.now();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subject, description })
+                });
+
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+
+                const data = await response.json();
+                const latency = (performance.now() - t0).toFixed(1);
+
+                document.getElementById('matchBadge').innerText = data.total_matches;
+                const latencyTag = document.getElementById('latencyTag');
+                latencyTag.innerText = `Latency: ${latency} ms`;
+                latencyTag.classList.remove('hidden');
+
+                // Case 1: Below threshold fallback
+                if (!data.has_match) {
+                    resultsContainer.className = 'flex-1 space-y-4';
+                    resultsContainer.innerHTML = `
+                        <div class="p-5 bg-amber-50/80 border border-amber-200/90 rounded-xl text-amber-900 space-y-3">
+                            <div class="flex items-center gap-2 font-bold text-amber-800 text-sm">
+                                <span>⚠️</span> No Relevant Match Found (Confidence &lt; 30%)
+                            </div>
+                            <p class="text-xs text-amber-800/90 leading-relaxed">
+                                No past historical ticket crossed the minimum 0.30 similarity threshold. This indicates a novel or rare issue.
+                            </p>
+                            <div class="pt-2.5 border-t border-amber-200/60 text-xs font-semibold text-amber-900">
+                                Recommended Action: Investigate manually or escalate to L2 support team.
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Case 2: Matching results list
+                resultsContainer.className = 'flex-1 space-y-4';
+                resultsContainer.innerHTML = data.matches.map((m) => `
+                    <div class="p-5 bg-white border border-slate-200 rounded-xl space-y-3 shadow-xs hover:border-slate-300 transition-all">
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-md">
+                                    ${m.ticket_id}
+                                </span>
+                                <span class="bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-0.5 rounded-full border border-slate-200/80 capitalize">
+                                    ${m.category}
+                                </span>
+                            </div>
+                            <span class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full shadow-2xs">
+                                ${m.match_percentage} Match
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-900 leading-snug">${m.subject}</h3>
+                        </div>
+
+                        <div class="bg-slate-50/80 p-3.5 rounded-lg border border-slate-200/80 space-y-1">
+                            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Verified Resolution:</span>
+                            <p class="text-xs text-slate-700 leading-relaxed">
+                                ${m.resolution_notes}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                resultsContainer.className = 'flex-1 space-y-4';
+                resultsContainer.innerHTML = `
+                    <div class="p-4 bg-red-50 border border-red-200 text-red-900 text-xs rounded-xl space-y-2">
+                        <div class="font-bold text-red-700 text-sm">Connection Failed</div>
+                        <p>Unable to reach FastAPI server at <code>${API_URL}</code>.</p>
+                        <p class="text-slate-600">Start the backend using: <code>python -m uvicorn server:app --reload --port 8000</code></p>
+                    </div>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70');
+            }
+        });
+    </script>
+</body>
+</html>
